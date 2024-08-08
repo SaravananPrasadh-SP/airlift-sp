@@ -22,43 +22,48 @@ public class symDecryptSecretProviderConfig
 {
 
 
-    @Config("keystore-file-path")
-    public symDecryptSecretProviderConfig setKeyStoreFilePath(String keyStoreFilePath)
+    @Config("algorithm")
+    public symDecryptSecretProviderConfig setAlgorithm(String algorithm)
     {
-        this.keyStoreFilePath = keyStoreFilePath;
+        this.algorithm = algorithm;
         return this;
     }
-
-    @NotNull
-    @FileExists
-    public String getKeyStoreFilePath()
+    public String getAlgorithm()
     {
-        return keyStoreFilePath;
+        return algorithm;
     }
 
-    @Config("keystore-type")
-    public KeystoreSecretProviderConfig setKeyStoreType(String keyStoreType)
+    @Config("secret-key-algorithm")
+    public symDecryptSecretProviderConfig setSecretKeyAlgorithm(String secretKeyAlgorithm)
     {
-        this.keyStoreType = keyStoreType;
+        this.secretKeyAlgorithm = secretKeyAlgorithm;
         return this;
     }
-
-    @NotNull
-    public String getKeyStoreType()
+    public String getSecretKeyAlgorithm()
     {
-        return keyStoreType;
+        return secretKeyAlgorithm;
     }
-
-    @Config("keystore-password")
-    @ConfigSecuritySensitive
-    public KeystoreSecretProviderConfig setKeyStorePassword(String keyStorePassword)
+    
+    @Config("key-length")
+    public symDecryptSecretProviderConfig setKeyLength(int keyLength)
     {
-        this.keyStorePassword = keyStorePassword;
+        this.keyLength = keyLength;
         return this;
     }
-
-    public String getKeyStorePassword()
+    public int getKeyLength()
     {
-        return keyStorePassword;
+        return keyLength;
     }
+
+    @Config("iteration-count")
+    public symDecryptSecretProviderConfig setIterationCount(int iterationCount)
+    {
+        this.iterationCount = iterationCount;
+        return this;
+    }
+    public int getIterationCount()
+    {
+        return iterationCount;
+    }
+    
 }

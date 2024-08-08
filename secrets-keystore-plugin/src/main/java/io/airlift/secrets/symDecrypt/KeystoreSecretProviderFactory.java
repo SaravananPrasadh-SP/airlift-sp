@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.secrets.keystore;
+package io.airlift.secrets.symDecrypt;
 
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
@@ -29,7 +29,7 @@ public class KeystoreSecretProviderFactory
     @Override
     public String getName()
     {
-        return "keystore";
+        return "symDecrypt";
     }
 
     @Override
@@ -37,8 +37,8 @@ public class KeystoreSecretProviderFactory
     {
         Bootstrap app = new Bootstrap(
                 binder -> {
-                    configBinder(binder).bindConfig(KeystoreSecretProviderConfig.class);
-                    binder.bind(SecretProvider.class).to(KeystoreSecretProvider.class).in(Scopes.SINGLETON);
+                    configBinder(binder).bindConfig(symDecryptSecretProviderConfig.class);
+                    binder.bind(SecretProvider.class).to(symDecryptSecretProvider.class).in(Scopes.SINGLETON);
                 });
 
         Injector injector = app

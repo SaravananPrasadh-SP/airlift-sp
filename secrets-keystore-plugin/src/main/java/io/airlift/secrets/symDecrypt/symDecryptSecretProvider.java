@@ -11,25 +11,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.secrets.symDecrypt;
+package io.airlift.secrets.symdecrypt;
 
 import com.google.inject.Inject;
-import io.airlift.spi.secrets.SecretProvider;
 
-// symmetric decryption imports
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.spec.KeySpec;
+import java.util.Base64;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.spec.KeySpec;
-import java.util.Base64;
-
-// General imports
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 public class symDecryptSecretProvider
         implements SecretProvider
@@ -53,28 +50,30 @@ public class symDecryptSecretProvider
     // command used to create the encrypted
     // echo -n "Your secret message" | openssl enc -aes-256-cbc -base64 -pass pass:"your_password" -pbkdf2
     // pin the decrytion Password.
-    return decrypt(encryptedValue);
+        return decrypt(encryptedValue);
     }
-    public static String decrypt(String cipherText) throws Exception {
+    
+    public static String decrypt(String cipherText) 
+        throws Exception {
+            byte[] cipherData = Base64.getDecoder().decode(cipherText);
+            byte[] saltData = extractSalt(cipherData);
+            byte[] encData = extractEncryptedData(cipherData);
 
-        byte[] cipherData = Base64.getDecoder().decode(cipherText);
-        byte[] saltData = extractSalt(cipherData);
-        byte[] encData = extractEncryptedData(cipherData);
+            SecretKey key = generateKey(encryptPassword, saltData);
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(saltData));
+            byte[] decryptedData = cipher.doFinal(encData);
+            // property 
+            System.setProperty(net.ssh, cipherText);
+            return new String(decryptedData, StandardCharsets.UTF_8);
+        }
 
-        SecretKey key = generateKey(encryptPassword, saltData);
-        Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(saltData));
-        byte[] decryptedData = cipher.doFinal(encData);
-        // property 
-        System.setProperty(net.ssh, cipherText)
-        return new String(decryptedData, StandardCharsets.UTF_8);
-    }
-
-    private static SecretKey generateKey(byte[] password, byte[] salt) throws Exception {
-        SecretKeyFactory factory = SecretKeyFactory.getInstance(secretKeyAlgorithm);
-        KeySpec spec = new PBEKeySpec(password.toString(), salt, iterationCount, keyLength);
-        return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
-    }
+    private static SecretKey generateKey(byte[] password, byte[] salt) 
+        throws Exception {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(secretKeyAlgorithm);
+            KeySpec spec = new PBEKeySpec(password.toString(), salt, iterationCount, keyLength);
+            return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+        }
 
     private static byte[] extractSalt(byte[] cipherData) {
         byte[] saltData = new byte[8];
