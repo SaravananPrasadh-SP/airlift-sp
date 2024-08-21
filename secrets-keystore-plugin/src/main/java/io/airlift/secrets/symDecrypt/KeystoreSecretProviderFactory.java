@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.secrets.symDecrypt;
+package io.airlift.secrets.symdecrypt;
 
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
@@ -37,8 +37,8 @@ public class KeystoreSecretProviderFactory
     {
         Bootstrap app = new Bootstrap(
                 binder -> {
-                    configBinder(binder).bindConfig(symDecryptSecretProviderConfig.class);
-                    binder.bind(SecretProvider.class).to(symDecryptSecretProvider.class).in(Scopes.SINGLETON);
+                    configBinder(binder).bindConfig(SymDecryptSecretProviderConfig.class);
+                    binder.bind(SecretProvider.class).to(SymDecryptSecretProvider.class).in(Scopes.SINGLETON);
                 });
 
         Injector injector = app

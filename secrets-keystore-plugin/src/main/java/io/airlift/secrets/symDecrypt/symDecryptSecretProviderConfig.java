@@ -11,59 +11,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.secrets.symDecrypt;
+package io.airlift.secrets.symdecrypt;
 
 import io.airlift.configuration.Config;
-import io.airlift.configuration.ConfigSecuritySensitive;
-import io.airlift.configuration.validation.FileExists;
-import jakarta.validation.constraints.NotNull;
 
-public class symDecryptSecretProviderConfig
+public class SymDecryptSecretProviderConfig
 {
-
-
     @Config("algorithm")
-    public symDecryptSecretProviderConfig setAlgorithm(String algorithm)
+    public SymDecryptSecretProviderConfig setAlgorithm(String algorithm)
     {
         this.algorithm = algorithm;
         return this;
     }
+
     public String getAlgorithm()
     {
-        return algorithm;
+        return this.algorithm;
     }
 
     @Config("secret-key-algorithm")
-    public symDecryptSecretProviderConfig setSecretKeyAlgorithm(String secretKeyAlgorithm)
+    public SymDecryptSecretProviderConfig setSecretKeyAlgorithm(String secretKeyAlgorithm)
     {
         this.secretKeyAlgorithm = secretKeyAlgorithm;
         return this;
     }
+
     public String getSecretKeyAlgorithm()
     {
-        return secretKeyAlgorithm;
+        return this.secretKeyAlgorithm;
     }
-    
+
     @Config("key-length")
-    public symDecryptSecretProviderConfig setKeyLength(int keyLength)
+    public SymDecryptSecretProviderConfig setKeyLength(int keyLength)
     {
         this.keyLength = keyLength;
         return this;
     }
+
     public int getKeyLength()
     {
-        return keyLength;
+        return this.keyLength;
     }
 
     @Config("iteration-count")
-    public symDecryptSecretProviderConfig setIterationCount(int iterationCount)
+    public SymDecryptSecretProviderConfig setIterationCount(int iterationCount)
     {
         this.iterationCount = iterationCount;
         return this;
     }
+
     public int getIterationCount()
     {
-        return iterationCount;
+        return this.iterationCount;
     }
-    
 }

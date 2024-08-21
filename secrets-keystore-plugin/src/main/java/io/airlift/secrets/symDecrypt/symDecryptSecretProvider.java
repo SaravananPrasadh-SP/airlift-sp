@@ -15,12 +15,6 @@ package io.airlift.secrets.symdecrypt;
 
 import com.google.inject.Inject;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.spec.KeySpec;
-import java.util.Base64;
-
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -28,19 +22,25 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class symDecryptSecretProvider
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.spec.KeySpec;
+import java.util.Base64;
+
+public class SymDecryptSecretProvider
         implements SecretProvider
 {
     private static final byte[] encryptPassword = {83, 116, 97, 114, 98, 117, 114, 115, 116, 82, 48, 99, 107, 115, 33};
 
     @Inject
-    public symDecryptSecretProvider(symDecryptSecretProviderConfig config)
+    public SymDecryptSecretProvider(SymDecryptSecretProviderConfig config)
             throws GeneralSecurityException, IOException
     {
-        algorithm = config.getAlgorithm();
-        secretKeyAlgorithm = config.getSecretKeyAlgorithm();
-        keyLength = config.getKeyLength();
-        iterationCount = config.getIterationCount();
+        String algorithm = config.getAlgorithm();
+        String secretKeyAlgorithm = config.getSecretKeyAlgorithm();
+        Integer keyLength = config.getKeyLength();
+        Integer iterationCount = config.getIterationCount();
     }
 
     @Override
@@ -52,36 +52,40 @@ public class symDecryptSecretProvider
     // pin the decrytion Password.
         return decrypt(encryptedValue);
     }
-    
-    public static String decrypt(String cipherText) 
-        throws Exception {
-            byte[] cipherData = Base64.getDecoder().decode(cipherText);
-            byte[] saltData = extractSalt(cipherData);
-            byte[] encData = extractEncryptedData(cipherData);
 
-            SecretKey key = generateKey(encryptPassword, saltData);
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(saltData));
-            byte[] decryptedData = cipher.doFinal(encData);
-            // property 
-            System.setProperty(net.ssh, cipherText);
-            return new String(decryptedData, StandardCharsets.UTF_8);
-        }
+    public static String decrypt(String cipherText)
+                    throws Exception
+    {
+        byte[] cipherData = Base64.getDecoder().decode(cipherText);
+        byte[] saltData = extractSalt(cipherData);
+        byte[] encData = extractEncryptedData(cipherData);
 
-    private static SecretKey generateKey(byte[] password, byte[] salt) 
-        throws Exception {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(secretKeyAlgorithm);
-            KeySpec spec = new PBEKeySpec(password.toString(), salt, iterationCount, keyLength);
-            return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
-        }
+        SecretKey key = generateKey(encryptPassword, saltData);
+        Cipher cipher = Cipher.getInstance(algorithm);
+        cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(saltData));
+        byte[] decryptedData = cipher.doFinal(encData);
 
-    private static byte[] extractSalt(byte[] cipherData) {
+        System.setProperty("net.ssh", cipherText);
+        return new String(decryptedData, StandardCharsets.UTF_8);
+    }
+
+    private static SecretKey generateKey(byte[] password, byte[] salt)
+                    throws Exception
+    {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance(secretKeyAlgorithm);
+        KeySpec spec = new PBEKeySpec(password.toString(), salt, iterationCount, keyLength);
+        return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+    }
+
+    private static byte[] extractSalt(byte[] cipherData)
+    {
         byte[] saltData = new byte[8];
         System.arraycopy(cipherData, 8, saltData, 0, 8);
         return saltData;
     }
 
-    private static byte[] extractEncryptedData(byte[] cipherData) {
+    private static byte[] extractEncryptedData(byte[] cipherData)
+    {
         byte[] encData = new byte[cipherData.length - 16];
         System.arraycopy(cipherData, 16, encData, 0, encData.length);
         return encData;
